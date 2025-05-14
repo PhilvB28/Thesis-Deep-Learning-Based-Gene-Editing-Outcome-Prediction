@@ -15,8 +15,7 @@ class CapsuleLayer(nn.Module):
 
     def forward(self, x):
         batch_size = x.size(0)
-        num_primary_caps = x.size(1)  # e.g., 32
-        # x: [batch_size, num_primary_caps, in_dim] where in_dim = 8
+        num_primary_caps = x.size(1)
 
         # Expand x for proper multiplication:
         x = x.unsqueeze(2)  # [B, num_primary_caps, 1, in_dim]
@@ -29,7 +28,7 @@ class CapsuleLayer(nn.Module):
         x = x.unsqueeze(-1)  # [batch_size, num_primary_caps, 1, in_dim, 1]
         x = x.transpose(-2, -1)  # [batch_size, num_primary_caps, 1, 1, in_dim]
 
-        # Now multiply: [1, in_dim] @ [in_dim, out_dim] yields [1, out_dim]
+        # Multiplication
         u_hat = torch.matmul(x, W)  # [batch_size, num_primary_caps, num_capsules, 1, out_dim]
         u_hat = u_hat.squeeze(-2)   # [batch_size, num_primary_caps, num_capsules, out_dim]
 
@@ -53,7 +52,7 @@ class CapsuleLayer(nn.Module):
         return scale * x
 
 class CapsNetTask(nn.Module):
-    def __init__(self, input_channels=4, sequence_length=60, in_dim=16, out_dim=16, num_routing=3):
+    def __init__(self, input_channels=4, sequence_length=60, in_dim=16, out_dim=16, num_routing=2):
         super(CapsNetTask, self).__init__()
         # Shared convolutional feature extractors
         self.conv1 = nn.Conv1d(input_channels, 32, kernel_size=3, stride=2, padding=1)
@@ -65,7 +64,7 @@ class CapsNetTask(nn.Module):
         # Primary capsules: convert conv features to 32 capsules of dim 8
         self.primary_caps = nn.Conv1d(64, 32 * 8, kernel_size=15, stride=15, padding=0)
 
-        # Intermediate capsule layer: 32 -> 8 capsules, each of dimension out_dim
+        # Intermediate capsule layer: 8 Capsules
         self.intermediate_caps = CapsuleLayer(
             num_capsules=8,
             in_dim=8,
@@ -109,9 +108,9 @@ class CapsNetTask(nn.Module):
         return self.head(x)                       # [batch, 1]
 
 
-class CapsNetRegressorSoftSharing_3layer(nn.Module):
+class CrisprCaps_soft(nn.Module): #CapsNetRegressor_SoftSharing_3layer
     def __init__(self, input_channels=4, sequence_length=60, in_dim=16, out_dim=16, num_routing=3):
-        super(CapsNetRegressorSoftSharing_3layer, self).__init__()
+        super(CrisprCaps_soft, self).__init__()
         # Instantiate one CapsNetTask per outcome (6 tasks)
         self.tasks = nn.ModuleList([
             CapsNetTask(input_channels, sequence_length, in_dim, out_dim, num_routing)
@@ -119,9 +118,9 @@ class CapsNetRegressorSoftSharing_3layer(nn.Module):
         ])
 
     def forward(self, x):
-        # Forward through each task network independently
-        outputs = [task(x) for task in self.tasks]  # list of [batch, 1]
-        return torch.cat(outputs, dim=1)             # [batch, 6]
+        # Independent task network forwarding
+        outputs = [task(x) for task in self.tasks]
+        return torch.cat(outputs, dim=1)
 
     def compute_soft_sharing_loss(self, p=2):
         """

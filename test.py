@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import mean_squared_error, roc_auc_score
 from scipy.stats import pearsonr, spearmanr
 
-from utils.data_utils import CRISPRDataset_557, CRISPRDataset_6, CRISPRDataset_noframeshift, CRISPRDataset_tokenized, CRISPRDataset_DeepIndel
+from utils.data_utils import CRISPRDataset
 
 
 def test(test_dfs, model, model_save_file, device, batch_size=32, table=False):
@@ -49,7 +49,7 @@ def test(test_dfs, model, model_save_file, device, batch_size=32, table=False):
     datasets = list(test_datasets.items())
     for idx, (name, ds) in enumerate(datasets):
         # Initialize dataset.
-        test_dataset = CRISPRDataset_DeepIndel(ds)
+        test_dataset = CRISPRDataset(ds)
         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
         all_preds = []
@@ -93,7 +93,17 @@ def test(test_dfs, model, model_save_file, device, batch_size=32, table=False):
                 auc_label = np.nan  # In case only one class is present
             aucs.append(auc_label)
 
-            per_label_results[f"label_{label}"] = {
+            label_names = {
+                0: "Del",
+                1: "1bp Del",
+                2: "1bp Ins",
+                3: "1bp FsF",
+                4: "2bp FsF",
+                5: "total FsF"
+            }
+            label_name = label_names.get(label, f"label_{label}")
+
+            per_label_results[label_name] = {
                 'MSE': mse_label,
                 'Pearson': pearson_label,
                 'Spearman': spearman_label,

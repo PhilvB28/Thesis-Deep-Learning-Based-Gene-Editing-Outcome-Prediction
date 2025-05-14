@@ -14,7 +14,7 @@ def find_microhomologies(sequence):
     """
 
     if len(sequence) != 60:
-        print(f"FEHLER in find_microhomologies: Länge = {len(sequence)}, Sequenz = {sequence}")
+        print(f"Error in find_microhomologies: Länge = {len(sequence)}, Sequence = {sequence}")
         raise ValueError("The input DNA sequence must be exactly 60 nucleotides long.")
 
     # Initialize variables

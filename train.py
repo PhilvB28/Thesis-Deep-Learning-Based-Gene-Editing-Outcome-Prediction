@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 import copy
 from tqdm import tqdm
 
-from utils.data_utils import CRISPRDataset_557, CRISPRDataset_6, CRISPRDataset_noframeshift, CRISPRDataset_tokenized, CRISPRDataset_DeepIndel
+from utils.data_utils import CRISPRDataset
 
 
 # Set device
@@ -16,8 +16,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def train_valid(train_df, valid_df, model_save_file, model, epochs, batch_size, lr, patience):
 
     # Tokenized Dataset
-    train_dataset = CRISPRDataset_DeepIndel(train_df)
-    valid_dataset = CRISPRDataset_DeepIndel(valid_df)
+    train_dataset = CRISPRDataset(train_df)
+    valid_dataset = CRISPRDataset(valid_df)
 
     # Create data loaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -87,5 +87,5 @@ def train_valid(train_df, valid_df, model_save_file, model, epochs, batch_size, 
 
     # Save the model
     torch.save(model.state_dict(), model_save_file)
-    print("Training abgeschlossen und Modell gespeichert.")
+    print("Training completed und model saved.")
 

@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class CapsuleLayer(nn.Module):
-    def __init__(self, num_capsules, in_dim, out_dim, num_routing=3):
+    def __init__(self, num_capsules, in_dim, out_dim, num_routing):
         super(CapsuleLayer, self).__init__()
         self.num_capsules = num_capsules
         self.in_dim = in_dim
@@ -15,8 +15,7 @@ class CapsuleLayer(nn.Module):
 
     def forward(self, x):
         batch_size = x.size(0)
-        num_primary_caps = x.size(1)  # e.g., 32
-        # x: [batch_size, num_primary_caps, in_dim] where in_dim = 8
+        num_primary_caps = x.size(1)
 
         # Expand x for proper multiplication:
         x = x.unsqueeze(2)  # [B, num_primary_caps, 1, in_dim]
@@ -29,7 +28,7 @@ class CapsuleLayer(nn.Module):
         x = x.unsqueeze(-1)  # [batch_size, num_primary_caps, 1, in_dim, 1]
         x = x.transpose(-2, -1)  # [batch_size, num_primary_caps, 1, 1, in_dim]
 
-        # Now multiply: [1, in_dim] @ [in_dim, out_dim] yields [1, out_dim]
+        # Multiplication
         u_hat = torch.matmul(x, W)  # [batch_size, num_primary_caps, num_capsules, 1, out_dim]
         u_hat = u_hat.squeeze(-2)   # [batch_size, num_primary_caps, num_capsules, out_dim]
 
@@ -52,11 +51,11 @@ class CapsuleLayer(nn.Module):
         scale = squared_norm / (1 + squared_norm) / torch.sqrt(squared_norm + 1e-8)
         return scale * x
 
-class CapsNetRegressorHardSharing_3_layer(nn.Module):
-    def __init__(self, input_channels=4, sequence_length=60, in_dim= 16, out_dim=16, num_routing=3):
-        super(CapsNetRegressorHardSharing_3_layer, self).__init__()
+class CrisprCaps_hard(nn.Module):  #CapsNetRegressor_HardSharing_3_layer
+    def __init__(self, input_channels=4, sequence_length=60, in_dim=8, out_dim=16, num_routing=2):
+        super(CrisprCaps_hard, self).__init__()
 
-        # Convolutional feature extractor using strided convolutions (no pooling)
+        # Convolutional feature extractor using strided convolutions
         # Sequence length: 60 -> 30 -> 15
         self.conv1 = nn.Conv1d(input_channels, 32, kernel_size=3, stride=2, padding=1)  # 60 -> 30
         self.bn1 = nn.BatchNorm1d(32)
@@ -64,8 +63,7 @@ class CapsNetRegressorHardSharing_3_layer(nn.Module):
         self.conv2 = nn.Conv1d(32, 64, kernel_size=5, stride=2, padding=2)  # 30 -> 15
         self.bn2 = nn.BatchNorm1d(64)
 
-        # Primary Capsule Layer: 32 capsules of dimension 8 (32*8 = 256 channels)
-        # Kernel and stride span the full reduced length (15)
+        # Primary Capsule Layer: 32 capsules of dimension 8
         self.primary_caps = nn.Conv1d(64, 32 * 8, kernel_size=15, stride=15)
 
         self.intermediate_caps = CapsuleLayer(
@@ -75,7 +73,7 @@ class CapsNetRegressorHardSharing_3_layer(nn.Module):
             num_routing=num_routing
         )
 
-        # Digit Capsule Layer: 6 output capsules, each 16-dimensional
+        # Digit Capsule Layer: 6 output capsules
         self.digit_caps = CapsuleLayer(num_capsules=6, in_dim=out_dim, out_dim=out_dim, num_routing=num_routing)
 
         # Regression heads: one small MLP per capsule
@@ -99,6 +97,7 @@ class CapsNetRegressorHardSharing_3_layer(nn.Module):
         x = x.squeeze(-1)  # -> [batch_size, 256]
         x = x.view(x.size(0), 32, 8)  # -> [batch_size, 32, 8]
 
+        # Intermediate Capsule
         x = self.intermediate_caps(x)
 
         # Digit capsules (dynamic routing)
