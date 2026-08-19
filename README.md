@@ -25,4 +25,4 @@ The repository contains data from:
 - Lindel (HEK293T)
 - SPROUT (T cells)
 
-The datasets were obtained from their publicly available repositories.
+The datasets were obtained from a publicly available repository.
