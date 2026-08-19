@@ -7,11 +7,9 @@ from sklearn.model_selection import train_test_split
 from train import train_valid
 from test import test
 from trainsoft import train_valid_soft
-from train_marginloss import train_valid_marginloss
 
 from models.CRISPR_Caps_hard import CapsNetRegressorHardSharing_3_layer
 from models.CRISPR_Caps_soft import CapsNetRegressorSoftSharing_3layer
-from models.Capstest_marginloss import CapsNetRegressorHardSharingMargin
 
 
 seed = 42

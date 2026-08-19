@@ -36,7 +36,7 @@ class CapsuleLayer(nn.Module):
         # Initialize routing logits:
         b_ij = torch.zeros(batch_size, num_primary_caps, self.num_capsules, device=x.device)
 
-        # Dynamic routing:
+        # Dynamic routing algorithm:
         for routing_iteration in range(self.num_routing):
             c_ij = F.softmax(b_ij, dim=2)  # coupling coefficients
             s_j = (c_ij.unsqueeze(-1) * u_hat).sum(dim=1)
@@ -56,7 +56,7 @@ class CapsNetRegressorHardSharing_3_layer(nn.Module):
     def __init__(self, input_channels=4, sequence_length=60, in_dim= 16, out_dim=16, num_routing=3):
         super(CapsNetRegressorHardSharing_3_layer, self).__init__()
 
-        # Convolutional feature extractor using strided convolutions (no pooling)
+        # Convolutional feature extractor using strided convolutions
         # Sequence length: 60 -> 30 -> 15
         self.conv1 = nn.Conv1d(input_channels, 32, kernel_size=3, stride=2, padding=1)  # 60 -> 30
         self.bn1 = nn.BatchNorm1d(32)

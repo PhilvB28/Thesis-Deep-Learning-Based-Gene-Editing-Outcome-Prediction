@@ -14,7 +14,7 @@ def find_microhomologies(sequence):
     """
 
     if len(sequence) != 60:
-        print(f"FEHLER in find_microhomologies: Länge = {len(sequence)}, Sequenz = {sequence}")
+        print(f"Error in find_microhomologies: length = {len(sequence)}, sequence = {sequence}")
         raise ValueError("The input DNA sequence must be exactly 60 nucleotides long.")
 
     # Initialize variables
@@ -33,7 +33,6 @@ def find_microhomologies(sequence):
 
 #One Hot encoding including GC frac and MH-count
 def dna_to_onehot_extra(dna_sequences, sequence_length=60, device=None):
-    # Set device to cuda if available (or use provided device)
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -82,14 +81,12 @@ def dna_to_onehot_extra(dna_sequences, sequence_length=60, device=None):
 
 #Simple one Hot encoding
 def dna_to_onehot(dna_sequences, sequence_length=60, device=None):
-    # Set device to CUDA if available (or use provided device)
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     batch_size = len(dna_sequences)
     num_channels = 4  # A, T, C, G
 
-    # Initialize a zero tensor on the target device
     onehot_matrix = torch.zeros((batch_size, num_channels, sequence_length),
                                 dtype=torch.float32, device=device)
 

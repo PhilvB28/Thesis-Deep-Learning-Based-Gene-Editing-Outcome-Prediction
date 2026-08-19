@@ -13,9 +13,9 @@ from models.CRISPR_Caps_hard import CapsNetRegressorHardSharing_3_layer
 
 from utils.data_utils import CRISPRDataset_DeepIndel
 
-forecast_path = r'C:\Users\Philipp\Desktop\Studium\BachelorArbeit\DeepIndel\datasets\K562 (n=35129).csv'
-lindel_path = r'C:\Users\Philipp\Desktop\Studium\BachelorArbeit\DeepIndel\datasets\HEK293t (n=4591).csv'
-sprout_path = r'C:\Users\Philipp\Desktop\Studium\BachelorArbeit\DeepIndel\datasets\Tcell (n=1603).csv'
+forecast_path = './datasets/Forecast K562 (n=35129).csv'
+lindel_path = './datasets/Lindel HEK293t (n=4591).csv'
+sprout_path = './datasets/Sprout Tcell (n=1603).csv'
 
 forecast_df = pd.read_csv(forecast_path)
 lindel_df = pd.read_csv(lindel_path)
@@ -40,7 +40,6 @@ def objective_function(hyperparams):
         print(f"Processing particle {i + 1}/{len(hyperparams)}")
         log_lr, in_dim, out_dim, num_routing, batch_size = params
 
-        # Convert hyperparameters to valid integer values
         #learning_rate = max(1e-6, min(1e-3, learning_rate))
 
         log_lr = max(-6, min(-3, log_lr))
@@ -50,7 +49,6 @@ def objective_function(hyperparams):
         num_routing = int(round(max(1, min(5, num_routing))))
         batch_size = int(round(max(16, min(128, batch_size))))
 
-        # Define model with the current hyperparameters
         model = CapsNetRegressorHardSharing_3_layer(
             input_channels=4,
             sequence_length=60,
@@ -72,7 +70,7 @@ def objective_function(hyperparams):
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
-        # Training loop (use fewer epochs for faster PSO evaluation)
+        # Training loop
         model.train()
         for epoch in range(3):
             for batch_x, batch_y in train_loader:
@@ -105,9 +103,9 @@ def objective_function(hyperparams):
         y_pred_all = np.vstack(y_pred_all)
         mse = mean_squared_error(y_true, y_pred_all)
 
-        all_mse.append(mse)  # Store MSE for this particle
+        all_mse.append(mse)
 
-    return np.array(all_mse)  # Return an array of MSE values for all particles
+    return np.array(all_mse)
 
 
 
