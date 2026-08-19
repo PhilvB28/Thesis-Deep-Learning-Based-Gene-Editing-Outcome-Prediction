@@ -6,7 +6,7 @@ This Project contains the the Deep Learning model Crispr-Caps, a prediction tool
 - saved_model – Contains trained model checkpoints.
 - utils – Contains utility functions for data processing and sequence encoding.
 
-  main.py – Main entry point for configuring and running model training.
+- main.py – Main entry point for configuring and running model training.
 - train.py – Training procedure for the hard parameter-sharing models.
 - trainsoft.py – Training procedure for the soft parameter-sharing model.
 - test.py – Functions for evaluating trained models and calculating performance metrics.
