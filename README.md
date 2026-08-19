@@ -1,9 +1,9 @@
-This Project contains the the Deep Learning model Crispr-Caps, a prediction tool for gene editing outcome prediction, based on Capsule Networks. 
+This Project contains the Deep Learning model Crispr-Caps, a tool for predicting gene-editing outcomes based on Capsule Networks. 
 
 ## Repository Structure
 - datasets – Contains the datasets used for training and evaluating the models.
 - models – Contains the different neural network architectures used in the project.
-- saved_model – Contains trained model checkpoints.
+- saved_models – Contains trained model checkpoints.
 - utils – Contains utility functions for data processing and sequence encoding.
 
 - main.py – Main entry point for configuring and running model training.
