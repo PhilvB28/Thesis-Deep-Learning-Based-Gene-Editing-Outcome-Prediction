@@ -18,3 +18,11 @@ This Project contains the Deep Learning model Crispr-Caps, a tool for predicting
 - pandas: 2.2.3
 - numpy: 2.1.3
 - pyswarms: 1.3.0
+
+## Datasets
+The repository contains data from:
+- FORECasT (K562)
+- Lindel (HEK293T)
+- SPROUT (T cells)
+
+The datasets were obtained from their publicly available repositories.
